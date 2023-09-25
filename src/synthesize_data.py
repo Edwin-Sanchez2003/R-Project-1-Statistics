@@ -57,25 +57,28 @@ parser = argparse.ArgumentParser(
 
 # arguments to be passed in by the user via the command line/terminal
 parser.add_argument('-i', '--input_file_path', help="The MSCOCO json file we want to collect information on.")
-parser.add_argument('-o', '--output_file_path', help="Where to write the collected data to. This is the path to a csv file, along with the file name. EX: './data.csv'")
+parser.add_argument('-o', '--output_dir', help="Where to write the collected data to. This is the path to a folder. If the folder doesn't exist, it will be created. If it already exists, it will be overwritten.")
 
 # get arguments from user
 args = parser.parse_args()
 
 # Constants/Params #
 INPUT_FILE_PATH = args.input_file_path
-OUTPUT_FILE_PATH = args.output_file_path
+OUTPUT_DIR = args.output_dir
 
 
 def main():
+    # make output directory, if it doesn't already exist
+    os.makedirs(OUTPUT_DIR)
+
     # load input MSCOCO json file
     data = load_json_file(file_path=INPUT_FILE_PATH)
 
     # collect the data that we want from the file
     collected_data = collect_data(data=data)
 
-    # write data to csv file
-    write_data_to_csv(file_path=OUTPUT_FILE_PATH, collected_data=collected_data)
+    # write data to csv files
+    write_data_to_csvs(output_dir=OUTPUT_DIR, collected_data=collected_data)
 # end main
 
 
@@ -196,17 +199,36 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
 
 # take the data we collected and write it to a csv file
-def write_data_to_csv(file_path:str, collected_data:tuple[dict, dict, dict])-> None:
-    # open a file to write data to
-    with open(file_path, 'w', newline='') as file:
-        writer = csv.writer(file)
-        field = ["name", "age", "country"]
-        
-        writer.writerow(field)
-        writer.writerow(["Oladele Damilola", "40", "Nigeria"])
-        writer.writerow(["Alina Hricko", "23", "Ukraine"])
-        writer.writerow(["Isabel Walter", "50", "United Kingdom"])
-    # end file context
+def write_data_to_csvs(output_dir:str, collected_data:tuple[dict, dict, dict])-> None:
+    # create a dict of file names and data dicts for our output files
+    csv_data:dict = {
+        "meta_data.csv", collected_data[0],
+        "image_data.csv", collected_data[1],
+        "object_data.csv", collected_data[2]
+    } # end csv_data dict
+
+    # loop over each file we want to make
+    for file_name, data in csv_data.items():
+        # get the path of where to write the file
+        file_path = os.path.join(output_dir, file_name)
+        # get the fields and the entries from our data
+        fields = data["fields"]
+        entries = data["entries"]
+
+        # open a file to write data to
+        with open(file_path, 'w', newline='') as file:
+            # create a csv writer to write to our file
+            writer = csv.writer(file)
+            
+            # write our fields as the first row of the file
+            writer.writerow(fields)
+
+            # write all of our entries to the file
+            for entry in entries:
+                writer.writerow(entry)
+            # end for loop writing entries
+        # end file context
+    # end for loop over files to write
 # end write_data_to_csv
 
 
