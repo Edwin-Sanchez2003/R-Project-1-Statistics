@@ -56,8 +56,8 @@ parser = argparse.ArgumentParser(
 ) # end ArgumentParser construction
 
 # arguments to be passed in by the user via the command line/terminal
-parser.add_argument('-i', '--input_file_path', help="The MSCOCO json file we want to collect information on.")
-parser.add_argument('-o', '--output_dir', help="Where to write the collected data to. This is the path to a folder. If the folder doesn't exist, it will be created. If it already exists, it will be overwritten.")
+parser.add_argument('-i', '--input_file_path', help="The path to the MSCOCO json file we want to collect information on.")
+parser.add_argument('-o', '--output_dir', default="./pre_proc_data/", help="Where to write the collected data to. This is the path to a folder. If the folder doesn't exist, it will be created. If it already exists, it will be overwritten.")
 
 # get arguments from user
 args = parser.parse_args()
