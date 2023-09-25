@@ -67,10 +67,26 @@ OUTPUT_FILE_PATH = args.output_file_path
 def main():
     pass
 
+    # load input MSCOCO json file
+    data = load_json_file(file_path=INPUT_FILE_PATH)
+
+    # collect the data that we want from the file
+
+    # write data to csv file
+# end main
+
+
+# loads a json file into a python dictionary
+def load_json_file(file_path:str)-> dict:
+    with open(file_path, "r") as file:
+        return json.load(file)
+# end load_json_file
+
 
 # collect the data that we want from an MSCOCO python dict
 def collect_data(data:dict):
     pass
+# end collect_data
 
 
 # take the data we collected and write it to a csv file
@@ -86,12 +102,6 @@ def write_data_to_csv(file_path:str)-> None:
         writer.writerow(["Isabel Walter", "50", "United Kingdom"])
     # end file context
 # end write_data_to_csv
-
-
-# loads a json file into a python dictionary
-def load_json_file(file_path:str)-> dict:
-    with open(file_path, "r") as file:
-        return json.load(file)
 
 
 if __name__ == "__main__":
