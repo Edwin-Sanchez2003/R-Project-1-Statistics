@@ -1,6 +1,8 @@
 """
     Introduction to Statistics
     R Project 1
+
+    Python version: 3.11.X
     
     Synthesize Data
     This python file contains code that takes MSCOCO json annotations
@@ -84,8 +86,56 @@ def load_json_file(file_path:str)-> dict:
 
 
 # collect the data that we want from an MSCOCO python dict
-def collect_data(data:dict):
-    pass
+def collect_data(data:dict)-> tuple():
+    """
+        Collect the data we want from the MSCOCO annotations.
+        The data we want:
+
+        Metadata:
+        - Total # of objects (integer). How many objects are in the entire dataset?
+        - Total # of images (integer). How many images are in the entire dataset? 
+       
+        Image Data:
+        - Number of objects in each image (integer). How many objects are in each image?
+          Store this as a column in a table, where each row is a new image.
+        - Width, height, Area, and Aspect Ratio of each image.
+        - store file name for convenience
+        
+        Object Data:
+        - Area of each object bbox (integer). What is the area of each object
+          in the dataset? Store this as another table, with each row being an annotation
+          and a column corresponding to the area.
+        - Width and Height of each objects. Two more columns for our object table.
+        - Calculate and store aspect ratio of each bounding box. Another column
+          for the objects table.
+        - also, keep track of the image each object belongs to, as an index.
+        
+        This data is stored as the following:
+        - metadata.csv, storing info from the entire dataset
+        - imagedata.csv, storing the table with image information
+        - objectdata.csv, storing the table for the objects (bboxes)
+    """
+    # data to store global information about the dataset
+    meta_data = {
+        "image_count": len(data["images"]),
+        "object_count": len(data["annotations"])
+    } # end meta_data dict
+
+    # data to store with respect to the images
+    image_data = {
+        "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio"],
+        "entries": []
+    } # end image_data dict
+
+    # data to store with respect to the objects
+    object_data = {
+        "fields": ["image_id", "width", "height", "area", "aspect_ratio"],
+        "entries": []
+    } # end object_data dict
+
+
+
+
 # end collect_data
 
 
