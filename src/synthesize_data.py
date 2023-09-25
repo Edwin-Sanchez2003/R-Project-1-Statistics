@@ -196,7 +196,7 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
 
 # take the data we collected and write it to a csv file
-def write_data_to_csv(file_path:str, collected_data:tuple[])-> None:
+def write_data_to_csv(file_path:str, collected_data:tuple[dict, dict, dict])-> None:
     # open a file to write data to
     with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
