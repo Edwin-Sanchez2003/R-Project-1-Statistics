@@ -37,6 +37,7 @@
     - By object. What do all of our objects have in common?
 """
 
+import os
 import json
 import csv
 
@@ -86,7 +87,7 @@ def load_json_file(file_path:str)-> dict:
 
 
 # collect the data that we want from an MSCOCO python dict
-def collect_data(data:dict)-> tuple():
+def collect_data(data:dict)-> tuple[dict, dict, dict]:
     """
         Collect the data we want from the MSCOCO annotations.
         The data we want:
@@ -108,12 +109,16 @@ def collect_data(data:dict)-> tuple():
         - Width and Height of each objects. Two more columns for our object table.
         - Calculate and store aspect ratio of each bounding box. Another column
           for the objects table.
+        - x, y coord for the center of the bbox. Location data of the object.
         - also, keep track of the image each object belongs to, as an index.
         
         This data is stored as the following:
         - metadata.csv, storing info from the entire dataset
         - imagedata.csv, storing the table with image information
         - objectdata.csv, storing the table for the objects (bboxes)
+
+        However, this function simply outputs the data into a tuple of dicts:
+        - output: (meta_data, image_data, object_data)
     """
     # data to store global information about the dataset
     meta_data = {
@@ -129,18 +134,69 @@ def collect_data(data:dict)-> tuple():
 
     # data to store with respect to the objects
     object_data = {
-        "fields": ["image_id", "width", "height", "area", "aspect_ratio"],
+        "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio"],
         "entries": []
     } # end object_data dict
 
+    # collect data for image_data dict
+    image_data["entries"]:list = []
+    for image in data["images"]: # loop over each image entry in the MSCOCO dataset
+        # get the data for one image
+        image_id = int(image["id"])
+        file_name = str(os.path.basename(image["file_name"]))
+        width = int(image["width"])
+        height = int(image["height"])
+        area = width*height
+        aspect_ratio = width//height # width / height, round to integer value
+        
+        # find out how many annotations belong to this image
+        object_count = 0
+        for annotation in data["annotations"]:
+            # check if this annotation belongs to this image
+            if int(annotation["image_id"]) == image_id:
+                # add to object_count
+                object_count += 1
+            # end if
+        # end for loop
 
+        # append to our image_data entries as an image entry
+        # must match our fields!
+        # "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio"]
+        image_data["entries"].append(
+            (image_id, file_name, object_count, width, height, area, aspect_ratio)
+        ) # end append
+    # end loop over images
 
+    # collect data for object_data dict
+    object_data["entries"]:list = []
+    for annotation in data["annotations"]:
+        # get data for one image
+        image_id = int(annotation["image_id"])
+        # bbox is in [x, y, width, height] format
+        width = int(annotation["bbox"][2]) # width value in mscoco annotation format
+        height = int(annotation["bbox"][3])
+        # left x coord plus half the width gets us the x coord for the center of the bbox
+        x = int(annotation["bbox"][0]) + (width//2)
+        y = int(annotation["bbox"][1]) + (height//2)
+        area = width*height
+        aspect_ratio = width//height
 
+        # append to our object_data entries as an object entry
+        # must match our fields!
+        # "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio"]
+        object_data["entries"].append(
+            (image_id, x, y, width, height, area, aspect_ratio)
+        ) # end append
+    # end for loop over annotations
+
+    # return the data we've collect on the file
+    # tuple of (meta_data, image_data, object_data)
+    return (meta_data, image_data, object_data)
 # end collect_data
 
 
 # take the data we collected and write it to a csv file
-def write_data_to_csv(file_path:str, collected_data)-> None:
+def write_data_to_csv(file_path:str, collected_data:tuple[])-> None:
     # open a file to write data to
     with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
