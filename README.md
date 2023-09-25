@@ -25,6 +25,8 @@ To use `synthesize_data.py`, you will execute the python script from the termina
 * **--input_file_path (-i):** The path to the MSCOCO json file we want to collect information on.
 * **--output_dir (-o):** *Default: "./pre_proc_data/"* Where to write the collected data to. This is the path to a folder. If the folder doesn't exist, it will be created. If it already exists, it will be overwritten.
 
+It is worth noting that the **output_dir** will be more or less the home for the data being generated. It is assumed that this script will be used multiple times on different data files. With that in mind, the script creates a subdirectory in the **output_dir** with the same name as the annotation file being processed. The data synthesized from the input file is then stored in this subdirectory, created specifically for this file's data.
+
 ### Example Usages
 This is an example usage of the `synthesize_data.py` file, where the following command is executed at the root directory of this project:
 
