@@ -69,7 +69,11 @@ OUTPUT_DIR = args.output_dir
 
 def main():
     # make output directory, if it doesn't already exist
-    os.makedirs(OUTPUT_DIR)
+    file_output_data_dir = os.path.join(
+        OUTPUT_DIR, # the dir to output the data to
+        os.path.splitext(os.path.basename(INPUT_FILE_PATH))[0] # make a folder specifically for this data
+    ) # end os.path.join
+    make_dir(path=file_output_data_dir)
 
     # load input MSCOCO json file
     data = load_json_file(file_path=INPUT_FILE_PATH)
@@ -78,8 +82,18 @@ def main():
     collected_data = collect_data(data=data)
 
     # write data to csv files
-    write_data_to_csvs(output_dir=OUTPUT_DIR, collected_data=collected_data)
+    write_data_to_csvs(output_dir=file_output_data_dir, collected_data=collected_data)
 # end main
+
+
+# make dir for output data
+def make_dir(path:str)-> None:
+    # check if the path DOESN'T exist
+    if os.path.exists(path) == False:
+        # if it doesn't exist, make it
+        os.makedirs(path)
+    # end if
+# end make_dir
 
 
 # loads a json file into a python dictionary
@@ -125,8 +139,8 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
     """
     # data to store global information about the dataset
     meta_data = {
-        "image_count": len(data["images"]),
-        "object_count": len(data["annotations"])
+        "fields": ["image_count", "object_count"],
+        "entries": [[len(data["images"]), len(data["annotations"])]]
     } # end meta_data dict
 
     # data to store with respect to the images
@@ -150,7 +164,7 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
         width = int(image["width"])
         height = int(image["height"])
         area = width*height
-        aspect_ratio = width//height # width / height, round to integer value
+        aspect_ratio = width/height # width / height
         
         # find out how many annotations belong to this image
         object_count = 0
@@ -182,7 +196,7 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
         x = int(annotation["bbox"][0]) + (width//2)
         y = int(annotation["bbox"][1]) + (height//2)
         area = width*height
-        aspect_ratio = width//height
+        aspect_ratio = width/height
 
         # append to our object_data entries as an object entry
         # must match our fields!
@@ -202,9 +216,9 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 def write_data_to_csvs(output_dir:str, collected_data:tuple[dict, dict, dict])-> None:
     # create a dict of file names and data dicts for our output files
     csv_data:dict = {
-        "meta_data.csv", collected_data[0],
-        "image_data.csv", collected_data[1],
-        "object_data.csv", collected_data[2]
+        "meta_data.csv": collected_data[0],
+        "image_data.csv": collected_data[1],
+        "object_data.csv": collected_data[2]
     } # end csv_data dict
 
     # loop over each file we want to make
@@ -225,6 +239,7 @@ def write_data_to_csvs(output_dir:str, collected_data:tuple[dict, dict, dict])->
 
             # write all of our entries to the file
             for entry in entries:
+
                 writer.writerow(entry)
             # end for loop writing entries
         # end file context
