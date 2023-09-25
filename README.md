@@ -28,6 +28,6 @@ To use `synthesize_data.py`, you will execute the python script from the termina
 ### Example Usages
 This is an example usage of the `synthesize_data.py` file, where the following command is executed at the root directory of this project:
 
-* **Short Flags:** `python ./src/synthesize_data.py -i ./data/raw_data/train.json, -o ./data/pre_proc_data/`
-* **Long Flags:** `python ./src/synthesize_data.py --input_file_path ./data/raw_data/train.json, -output_dir ./data/pre_proc_data/`
+* **Short Flags:** `python ./src/synthesize_data.py -i ./data/raw_data/train.json -o ./data/pre_proc_data/`
+* **Long Flags:** `python ./src/synthesize_data.py --input_file_path ./data/raw_data/train.json -output_dir ./data/pre_proc_data/`
 * **No ouput_dir specified (default output_dir):** `python ./src/synthesize_data.py -i ./data/raw_data/train.json`
