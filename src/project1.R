@@ -101,6 +101,10 @@ par(mfrow=c(1, 1))
 
 
 ## OBJECT DATA ##############################
+describe(obj_data_train) # get general details
+describe(img_data_validation) # get general details
+describe(img_data_test) # get general details
+
 par(mfrow = c(2, 1))
 hist(obj_data_train$x)
 hist(obj_data_train$y)
@@ -152,7 +156,7 @@ plot(obj_data_validation$x_norm, obj_data_validation$y_norm,
      ylim= c(0.0, 1.0),
      col = "#cc0000",  # Hex code for datalab.cc red
      pch = 19,         # Use solid circles for points
-     main = "Train: Normalized Location of Objects",
+     main = "Validation: Normalized Location of Objects",
      xlab = "X Location (Normalized)",
      ylab = "Y Location (Normalized)")
 
@@ -161,7 +165,7 @@ plot(obj_data_test$x_norm, obj_data_test$y_norm,
      ylim= c(0.0, 1.0),
      col = "#cc0000",  # Hex code for datalab.cc red
      pch = 19,         # Use solid circles for points
-     main = "Train: Normalized Location of Objects",
+     main = "Test: Normalized Location of Objects",
      xlab = "X Location (Normalized)",
      ylab = "Y Location (Normalized)")
 par(mfrow = c(1, 1))
