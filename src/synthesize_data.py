@@ -153,7 +153,7 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
     # data to store with respect to the objects
     object_data = {
-        "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"],
+        "fields": ["image_id", "x", "y", "x_norm", "y_norm", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"],
         "entries": []
     } # end object_data dict
 
@@ -193,12 +193,24 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
     for annotation in data["annotations"]:
         # get data for one image
         image_id = int(annotation["image_id"])
+
+        # get image width & height
+        img_width = -1
+        img_height = -1
+        for image in data["images"]:
+            if int(image["id"]) == image_id:
+                img_width = int(image["width"])
+                img_height = int(image["height"])
+            # end if
+        # end for loop over image data
+
         # bbox is in [x, y, width, height] format
         width = int(annotation["bbox"][2]) # width value in mscoco annotation format
         height = int(annotation["bbox"][3])
         # left x coord plus half the width gets us the x coord for the center of the bbox
         x = int(annotation["bbox"][0]) + (width//2)
         y = int(annotation["bbox"][1]) + (height//2)
+        x_norm, y_norm = norm_center(x=x, y=y, img_width=img_width, img_height=img_height)
         area = width*height
         aspect_ratio = get_int_aspect_ratio(width=width, height=height)
         aspect_ratio = str(aspect_ratio[0]) + ":" + str(aspect_ratio[1])
@@ -206,9 +218,9 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
         # append to our object_data entries as an object entry
         # must match our fields!
-        # "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"]
+        # "fields": ["image_id", "x", "y", "x_norm", "y_norm", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"]
         object_data["entries"].append(
-            (image_id, x, y, width, height, area, aspect_ratio, aspect_ratio_f)
+            (image_id, x, y, x_norm, y_norm, width, height, area, aspect_ratio, aspect_ratio_f)
         ) # end append
     # end for loop over annotations
 
@@ -266,6 +278,14 @@ def get_int_aspect_ratio(width:int, height:int)->tuple[int, int]:
     return (w_factor, h_factor)
 # end get_int_aspect_ratio
 
+
+# normalize the center point of each ship based on the width and height of the image
+def norm_center(x:int, y:int, img_width:int, img_height:int)-> tuple[int, int]:
+    # divide x pos by width
+    x_norm = x/img_width
+    y_norm = y/img_height
+    return (x_norm, y_norm)
+# end norm_center
 
 if __name__ == "__main__":
     main()
