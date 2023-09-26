@@ -41,6 +41,8 @@ import os
 import json
 import csv
 
+import math
+
 import argparse
 
 # the description of the file when used on the terminal
@@ -145,13 +147,13 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
     # data to store with respect to the images
     image_data = {
-        "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio"],
+        "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"],
         "entries": []
     } # end image_data dict
 
     # data to store with respect to the objects
     object_data = {
-        "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio"],
+        "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"],
         "entries": []
     } # end object_data dict
 
@@ -164,7 +166,9 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
         width = int(image["width"])
         height = int(image["height"])
         area = width*height
-        aspect_ratio = width/height # width / height
+        aspect_ratio = get_int_aspect_ratio(width=width, height=height)
+        aspect_ratio = str(aspect_ratio[0]) + ":" + str(aspect_ratio[1])
+        aspect_ratio_f = width/height # width / height
         
         # find out how many annotations belong to this image
         object_count = 0
@@ -178,9 +182,9 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
 
         # append to our image_data entries as an image entry
         # must match our fields!
-        # "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio"]
+        # "fields": ["id", "file_name", "object_count", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"]
         image_data["entries"].append(
-            (image_id, file_name, object_count, width, height, area, aspect_ratio)
+            (image_id, file_name, object_count, width, height, area, aspect_ratio, aspect_ratio_f)
         ) # end append
     # end loop over images
 
@@ -196,13 +200,15 @@ def collect_data(data:dict)-> tuple[dict, dict, dict]:
         x = int(annotation["bbox"][0]) + (width//2)
         y = int(annotation["bbox"][1]) + (height//2)
         area = width*height
-        aspect_ratio = width/height
+        aspect_ratio = get_int_aspect_ratio(width=width, height=height)
+        aspect_ratio = str(aspect_ratio[0]) + ":" + str(aspect_ratio[1])
+        aspect_ratio_f = width/height # width / height
 
         # append to our object_data entries as an object entry
         # must match our fields!
-        # "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio"]
+        # "fields": ["image_id", "x", "y", "width", "height", "area", "aspect_ratio", "aspect_ratio_float"]
         object_data["entries"].append(
-            (image_id, x, y, width, height, area, aspect_ratio)
+            (image_id, x, y, width, height, area, aspect_ratio, aspect_ratio_f)
         ) # end append
     # end for loop over annotations
 
@@ -245,6 +251,20 @@ def write_data_to_csvs(output_dir:str, collected_data:tuple[dict, dict, dict])->
         # end file context
     # end for loop over files to write
 # end write_data_to_csv
+
+
+# get the aspect ratio as integers
+# returns the values by (width, height)
+def get_int_aspect_ratio(width:int, height:int)->tuple[int, int]:
+    # find gcf (a.k.a. gcd) of width and height
+    gcd = math.gcd(width, height)
+
+    # divide width and height by gcd
+    # use // (integer division) to coerce integer output instead of floating point output
+    w_factor = width//gcd
+    h_factor = height//gcd
+    return (w_factor, h_factor)
+# end get_int_aspect_ratio
 
 
 if __name__ == "__main__":
